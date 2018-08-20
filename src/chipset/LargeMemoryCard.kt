@@ -1,6 +1,8 @@
 package com.geno1024.gvm.chipset
 
 import com.geno1024.gvm.devices.Motherboard
+import com.geno1024.gvm.hex16
+import com.geno1024.gvm.hex2
 
 class LargeMemoryCard constructor(val size: Long, val pageSizeBy2: Int = 30)
 {
@@ -56,20 +58,20 @@ class LargeMemoryCard constructor(val size: Long, val pageSizeBy2: Int = 30)
         // first line
         val leftLine = left and 0x7fff_ffff_ffff_fff0
         val rightLine = right and 0x7fff_ffff_ffff_fff0
-        print("${leftLine.toString(16).padStart(16, '0')}: ")
+        print("${leftLine.hex16()}: ")
         (leftLine until left).forEach { print("   ") }
-        (left..leftLine + 15).forEach { print("${read1(it).toString(16).padStart(2, '0')} ") }
+        (left..leftLine + 15).forEach { print("${read1(it).hex2()} ") }
 
         // loop lines
         (leftLine + 16 until rightLine).forEach {
-            if (it and 15 == 0L) print("\n${it.toString(16).padStart(16, '0')}: ")
-            print("${read1(it).toString(16).padStart(2, '0')} ")
+            if (it and 15 == 0L) print("\n${it.hex16()}: ")
+            print("${read1(it).hex2()} ")
         }
 
         // last line
-        print("\n${rightLine.toString(16).padStart(16, '0')}: ")
+        print("\n${rightLine.hex16()}: ")
         (rightLine..right).forEach {
-            print("${read1(it).toString(16).padStart(2, '0')} ")
+            print("${read1(it).hex2()} ")
         }
 
     }
