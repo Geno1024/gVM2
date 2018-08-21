@@ -30,25 +30,21 @@ class LargeMemoryCard constructor(val size: Long, val pageSizeBy2: Int = 30)
         write1(pos + 3, (data).toByte())
     }
 
-    fun read16(pos: Long): Long =
-        (read4(pos).toLong() and 4294967295 shl 96) +
-        (read4(pos + 4).toLong() and 4294967295 shl 64) +
-        (read4(pos + 8).toLong() and 4294967295 shl 32) +
-        (read4(pos + 12).toLong() and 4294967295)
+    fun read8(pos: Long): Long =
+        (read4(pos).toLong() and 4294967295 shl 32) +
+        (read4(pos + 4).toLong() and 4294967295)
 
-    fun write16(pos: Long, data: Long)
+    fun write8(pos: Long, data: Long)
     {
-        write4(pos, (data shr 96).toInt())
-        write4(pos + 4, (data shr 64).toInt())
-        write4(pos + 8, (data shr 32).toInt())
-        write4(pos + 12, data.toInt())
+        write4(pos, (data shr 32).toInt())
+        write4(pos + 4, data.toInt())
     }
 
     fun load(pos: Long, data: Array<Byte>) = data.forEachIndexed { index, datum -> write1(pos + index, datum) }
 
     fun load(pos: Long, data: Array<Int>) = data.forEachIndexed { index, datum -> write4(pos + 4 * index, datum) }
 
-    fun load(pos: Long, data: Array<Long>) = data.forEachIndexed { index, datum -> write16(pos + 16 * index, datum) }
+    fun load(pos: Long, data: Array<Long>) = data.forEachIndexed { index, datum -> write8(pos + 8 * index, datum) }
 
     fun dump(left: Long = 0L, right: Long = size)
     {
