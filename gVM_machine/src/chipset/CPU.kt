@@ -101,6 +101,9 @@ class CPU constructor(val DEBUG: Boolean = false)
 
     fun Long.setIf(cond: () -> Boolean) = if (cond()) { FLAGS or this } else { FLAGS and inv() }
 
+    fun Long.high() = ushr(32)
+    fun Long.low() = and(0xffff_ffff)
+
     fun run(ip: Long = IP)
     {
         IP = ip
@@ -131,7 +134,7 @@ class CPU constructor(val DEBUG: Boolean = false)
         )[i]?.invoke()?:err()
     }
 
-    // indirect assignment
+    // addition and subtraction
     val l01 = { i: Int ->
         mapOf(
             0x00 to { OF.setIf { XA == 0x7fff_ffff_ffff_ffff }; XA++; IP += 2; },
@@ -261,7 +264,50 @@ class CPU constructor(val DEBUG: Boolean = false)
     // indirect multiplication and division
     val l03 = { i: Int ->
         mapOf(
-            0x00 to { XA *= (XA) }
+            0x00 to {
+                val op = memory.read8(IP + 2)
+                val (h1, l1) = XA.high() to XA.low()
+                val (h2, l2) = op.high() to op.low()
+                val l = l1 * l2
+                val m = l1 * h2 + l2 * h1
+                val h = h1 * h2
+                XA = (l.high() + m.low() shl 32) + l.low()
+                XE = (h.high() shl 32) + m.high() + h.low()
+                IP += 10
+            },
+            0x01 to {
+                val op = memory.read8(IP + 2)
+                val (h1, l1) = XB.high() to XB.low()
+                val (h2, l2) = op.high() to op.low()
+                val l = l1 * l2
+                val m = l1 * h2 + l2 * h1
+                val h = h1 * h2
+                XB = (l.high() + m.low() shl 32) + l.low()
+                XF = (h.high() shl 32) + m.high() + h.low()
+                IP += 10
+            },
+            0x02 to {
+                val op = memory.read8(IP + 2)
+                val (h1, l1) = XC.high() to XC.low()
+                val (h2, l2) = op.high() to op.low()
+                val l = l1 * l2
+                val m = l1 * h2 + l2 * h1
+                val h = h1 * h2
+                XC = (l.high() + m.low() shl 32) + l.low()
+                XG = (h.high() shl 32) + m.high() + h.low()
+                IP += 10
+            },
+            0x03 to {
+                val op = memory.read8(IP + 2)
+                val (h1, l1) = XD.high() to XD.low()
+                val (h2, l2) = op.high() to op.low()
+                val l = l1 * l2
+                val m = l1 * h2 + l2 * h1
+                val h = h1 * h2
+                XD = (l.high() + m.low() shl 32) + l.low()
+                XH = (h.high() shl 32) + m.high() + h.low()
+                IP += 10
+            }
         )[i]?.invoke()?:err()
     }
 

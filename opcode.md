@@ -7,7 +7,7 @@
 | 0x00 0x00 | NOP | No OPeration |
 | 0x00 0x01 | EXIT | EXIT current process |
 
-## 0x01 Indirect Assignment
+## 0x01 Addition and Subtraction
 
 | Byte | Mnemonic | Description | 
 | :---: | :---: | :---: |

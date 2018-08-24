@@ -35,6 +35,9 @@ object Assembler
                 val opn = ops.size
                 when (op)
                 {
+                    "STOP" -> { // 0001
+                        return "0001"
+                    }
                     "INC" -> { // 010?
                         if (opn > 1) throw OperandException("Too many operands.")
                         else if (opn == 0) throw OperandException("Lost operands.")
@@ -75,26 +78,45 @@ object Assembler
                         else if (opn < 2) throw OperandException("Too few operands.")
                         return "01F${registerIndex(ops[0])}${ops[1].toGlong().toString(16).padStart(2, '0')}"
                     }
-                    "MOV", "MOV8" -> { // 020? ????????????????
+                    "ASN", "ASN8" -> { // 020? ????????????????
                         if (opn > 2) throw OperandException("Too many operands.")
                         else if (opn < 2) throw OperandException("Too few operands.")
                         return "020${registerIndex(ops[0])}${ops[1].toGlong().toString(16).padStart(16, '0')}"
                     }
-                    "MOV4" -> { // 021? ????????
+                    "ASN4" -> { // 021? ????????
                         if (opn > 2) throw OperandException("Too many operands.")
                         else if (opn < 2) throw OperandException("Too few operands.")
                         return "021${registerIndex(ops[0])}${ops[1].toGlong().toString(16).padStart(8, '0')}"
                     }
-                    "MOV1" -> { // 023? ??
+                    "ASN1" -> { // 023? ??
                         if (opn > 2) throw OperandException("Too many operands.")
                         else if (opn < 2) throw OperandException("Too few operands.")
                         return "023${registerIndex(ops[0])}${ops[1].toGlong().toString(16).padStart(2, '0')}"
+                    }
+                    "ASNL4" -> { // 025? ????????
+                        if (opn > 2) throw OperandException("Too many operands.")
+                        else if (opn < 2) throw OperandException("Too few operands.")
+                        return "025${registerIndex(ops[0])}${ops[1].toGlong().toString(16).padStart(8, '0')}"
+                    }
+                    "ASNL1" -> { // 027? ??
+                        if (opn > 2) throw OperandException("Too many operands.")
+                        else if (opn < 2) throw OperandException("Too few operands.")
+                        return "027${registerIndex(ops[0])}${ops[1].toGlong().toString(16).padStart(2, '0')}"
+                    }
+                    "MUL", "MUL8" -> { // 030? ????????????????
+                        if (opn > 2) throw OperandException("Too many operands.")
+                        else if (opn < 2) throw OperandException("Too few operands.")
+                        if (ops[0][1] !in ('A'..'D')) throw OperandException("MUL allows only at XA to XD.")
+                        return "030${registerIndex(ops[0])}${ops[1].toGlong().toString(16).padStart(16, '0')}"
                     }
                     else -> throw OperatorException("Invalid operator.")
                 }
         }
     }
 
+    fun assembleLines(lines: String): String = lines.lines().map(Assembler::assembleSingleLine).joinToString(separator = "") { it }
+
+    fun string2bin(code: String): Array<Byte> = code.chunked(2).map { it.toInt(16).toByte() }.toTypedArray()
 
     open class AssemblerException: Exception
     {
